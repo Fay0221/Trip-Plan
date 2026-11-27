@@ -150,7 +150,7 @@ button,input,select,textarea{touch-action:manipulation}
 /* ===== 在這裡貼上你的 Firebase 設定 ===== */
 const CFG={apiKey:"AIzaSyDyUk-VMrg0YbBEgc_cueQSku8R1vZ5o_c",authDomain:"trip-plan-9cbe5.firebaseapp.com",projectId:"trip-plan-9cbe5",storageBucket:"trip-plan-9cbe5.firebasestorage.app",messagingSenderId:"42515293827",appId:"1:42515293827:web:a7f6fafa908f7c13081db6"};
 /* ======================================= */
-const VERSION='v1.42 · 2026-11-20';
+const VERSION='v1.43 · 2026-11-20';
 
 const $=s=>document.querySelector(s);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -225,9 +225,9 @@ const HD='<span class="hd" title="按住拖曳排序">⠿</span>';
 const row=(n,x)=>`<div class="it" data-i="${x.id}">${n==='food'?HD:''}<input type="checkbox" data-act="tg" data-n="${n}" data-i="${x.id}" ${x.done?'checked':''} aria-label="完成"><span class="${x.done?'done':''}">${esc(x.text)}</span><button class="x" data-act="dl" data-n="${n}" data-i="${x.id}" aria-label="刪除">✕</button></div>`;
 const addRow=(id,ph,act,extra='')=>`<div class="add">${extra}<input id="${id}" placeholder="${ph}" aria-label="${ph}"><button data-act="${act}">加入</button></div>`;
 
-const wrow=x=>{if(editWish===x.id)return `<div class="it" data-i="${x.id}" style="flex-wrap:wrap"><input id="wq_t" value="${esc(x.text)}" aria-label="名稱" style="flex:1 1 140px"><button data-act="ws" data-i="${x.id}">儲存</button><button class="x" data-act="wc" style="border:1.5px solid var(--ln)">取消</button></div>`;
+const wrow=x=>{if(editWish===x.id)return `<div class="it" data-i="${x.id}" style="flex-wrap:wrap"><input id="wq_t" value="${esc(x.text)}" aria-label="名稱" style="flex:1 1 100%"><input id="wq_u" value="${esc(x.url||'')}" placeholder="網址（可留空）" aria-label="網址" style="flex:1 1 100%"><input id="wq_h" value="${esc(x.hours||'')}" placeholder="營業時間（可留空，例如 10:00–18:00，週一公休）" aria-label="營業時間" style="flex:1 1 100%"><button data-act="ws" data-i="${x.id}">儲存</button><button class="x" data-act="wc" style="border:1.5px solid var(--ln)">取消</button></div>`;
   const ow=(Array.isArray(x.ppl)?x.ppl:[]).filter(id=>D.people.some(p=>p.id===id));
-  return `<div class="it" data-i="${x.id}" style="flex-wrap:wrap">${HD}<input type="checkbox" data-act="tg" data-n="food" data-i="${x.id}" ${x.done?'checked':''} aria-label="完成"><span class="${x.done?'done':''}">${esc(x.text)}</span><button class="owb ${ow.length?'has':''}" data-act="wp" data-i="${x.id}" aria-label="選擇人員">${ow.length?ow.map(id=>nm(id)).join('、'):'＋人員'}</button><button class="x" data-act="we" data-i="${x.id}" aria-label="編輯名稱">✎</button><button class="x" data-act="dl" data-n="food" data-i="${x.id}" aria-label="刪除">✕</button>`+(wishOpen===x.id?(D.people.length?`<div class="chips" style="flex:0 0 100%;margin:2px 0 4px 28px">${byT(D.people).map(p=>`<button class="pc ${ow.includes(p.id)?'on':''}" data-act="wt" data-i="${x.id}" data-p="${p.id}">${esc(p.name)}</button>`).join('')}</div>`:'<div class="mut sm" style="flex:0 0 100%">請先在上方「參加人員」加入</div>'):'')+'</div>';
+  return `<div class="it" data-i="${x.id}" style="flex-wrap:wrap">${HD}<input type="checkbox" data-act="tg" data-n="food" data-i="${x.id}" ${x.done?'checked':''} aria-label="完成"><span class="${x.done?'done':''}">${esc(x.text)}</span>${lkb(x.url)}<button class="owb ${ow.length?'has':''}" data-act="wp" data-i="${x.id}" aria-label="選擇人員">${ow.length?ow.map(id=>nm(id)).join('、'):'＋人員'}</button><button class="x" data-act="we" data-i="${x.id}" aria-label="編輯名稱">✎</button><button class="x" data-act="dl" data-n="food" data-i="${x.id}" aria-label="刪除">✕</button>${x.hours?`<div class="mut sm" style="flex:0 0 100%;padding-left:48px;margin-top:-4px">🕒 ${esc(x.hours)}</div>`:''}`+(wishOpen===x.id?(D.people.length?`<div class="chips" style="flex:0 0 100%;margin:2px 0 4px 28px">${byT(D.people).map(p=>`<button class="pc ${ow.includes(p.id)?'on':''}" data-act="wt" data-i="${x.id}" data-p="${p.id}">${esc(p.name)}</button>`).join('')}</div>`:'<div class="mut sm" style="flex:0 0 100%">請先在上方「參加人員」加入</div>'):'')+'</div>';
 };
 const MEAL={b:'早餐',l:'午餐',s:'點心',d:'晚餐',n:'宵夜'};
 const staysOf=nd=>nd.stays&&nd.stays.length?nd.stays:['stay'];
@@ -348,17 +348,18 @@ function gearV(){
 }
 const CT=()=>[...(M.cats&&M.cats.length?M.cats:['蔬菜','調味','肉']).filter(x=>x!=='其他'),'其他'];
 const catOf=x=>CT().includes(x.cat)?x.cat:'其他';
-let buyCat='蔬菜',catEdit=false;
-const buyRow=x=>`<div class="it sm" data-i="${x.id}">${HD}<input type="checkbox" data-act="tg" data-n="food" data-i="${x.id}" ${x.done?'checked':''} aria-label="完成"><span class="${x.done?'done':''}">${x.auto?'🍳 ':''}${esc(x.text)}</span>${qtyCell('food',x)}<select class="ci" data-i="${x.id}" aria-label="分類">${CT().map(c=>`<option ${c===catOf(x)?'selected':''}>${esc(c)}</option>`).join('')}</select><button class="x" data-act="dl" data-n="food" data-i="${x.id}" aria-label="刪除">✕</button></div>`;
+const ownOf=x=>x.own&&D.people.some(p=>p.id===x.own)?x.own:'';
+let buyCat='',catEdit=false;
+const buyRow=x=>`<div class="it sm" data-i="${x.id}">${HD}<input type="checkbox" data-act="tg" data-n="food" data-i="${x.id}" ${x.done?'checked':''} aria-label="完成"><span class="${x.done?'done':''}">${x.auto?'🍳 ':''}${esc(x.text)}</span>${qtyCell('food',x)}<select class="ci" data-i="${x.id}" aria-label="負責人"><option value="">未分配</option>${byT(D.people).map(p=>`<option value="${p.id}" ${ownOf(x)===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><button class="x" data-act="dl" data-n="food" data-i="${x.id}" aria-label="刪除">✕</button></div>`;
 function foodV(){
   const T=[['eat','心願清單','想吃的店或料理（吃過就勾選）'],['buy','食材採買','要買什麼（買好就勾選）']];
   const [k,title,ph]=T.find(x=>x[0]===foodTab)||T[0];
   const l=byO(D.food.filter(x=>x.kind===k)),n=l.filter(x=>x.done).length;
   let body;
-  if(k==='buy')body=CT().map(c=>{const g=l.filter(x=>catOf(x)===c);return g.length?`<div class="mut sm cat">${esc(c)}（${g.length}）</div><div class="fl">${g.map(buyRow).join('')}</div>`:''}).join('')||'<div class="mut">還沒有項目</div>';
+  if(k==='buy')body=[{id:'',name:'未分配'},...byT(D.people).map(p=>({id:p.id,name:p.name}))].map(g=>{const it=l.filter(x=>ownOf(x)===g.id);return it.length?`<div class="mut sm cat">${esc(g.name)}（${it.length}）</div><div class="fl">${it.map(buyRow).join('')}</div>`:''}).join('')||'<div class="mut">還沒有項目</div>';
   else body='<div class="fl">'+(l.length?l.map(wrow).join(''):'<div class="mut">還沒有項目</div>')+'</div>';
-  const add=k==='buy'?`<div class="add" style="flex-wrap:wrap"><select id="c_buy" aria-label="分類" style="flex:0 0 76px">${CT().map(c=>`<option ${c===buyCat?'selected':''}>${esc(c)}</option>`).join('')}</select><input id="f_buy" placeholder="品項" aria-label="品項" style="flex:1 1 120px"><input id="q_buy" placeholder="數量" aria-label="數量" style="flex:0 0 64px"><button data-act="af_buy">加入</button></div>`:`<div class="add" style="flex-wrap:wrap"><input id="f_eat" placeholder="${ph}" aria-label="心願"><button data-act="af_eat">加入</button></div><div class="mut sm" style="margin-top:8px">誰想吃（可不選）</div><div class="chips" style="margin:4px 0 0">${D.people.length?byT(D.people).map(p=>`<button class="pc ${wishSel.includes(p.id)?'on':''}" data-act="wn" data-p="${p.id}">${esc(p.name)}</button>`).join(''):'<span class="mut sm">先在上方「參加人員」加入</span>'}</div>`;
-  const mg=k==='buy'?`<div style="margin-top:12px"><button class="x" data-act="ce" style="padding:2px 0;font-size:13px">${catEdit?'收起分類管理':'⚙ 管理分類'}</button>`+(catEdit?`<div class="chips" style="margin:8px 0">${CT().map(c=>`<span class="chip">${esc(c)}${c==='其他'?'':`<button class="x" data-act="dc" data-k="${esc(c)}" aria-label="刪除分類">✕</button>`}</span>`).join('')}</div><div class="add"><input id="cn" placeholder="新分類，例如：水果" aria-label="新分類" maxlength="8"><button data-act="ac">新增</button></div><p class="mut sm" style="margin:6px 0 0">刪除分類後，裡面的食材會移到「其他」。</p>`:'')+'</div>':'';
+  const add=k==='buy'?`<div class="add" style="flex-wrap:wrap"><select id="c_buy" aria-label="負責人" style="flex:0 0 76px"><option value="">未分配</option>${byT(D.people).map(p=>`<option value="${p.id}" ${buyCat===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><input id="f_buy" placeholder="品項" aria-label="品項" style="flex:1 1 120px"><input id="q_buy" placeholder="數量" aria-label="數量" style="flex:0 0 64px"><button data-act="af_buy">加入</button></div>`:`<div class="fw"><div class="add" style="flex-wrap:wrap"><input id="f_eat" placeholder="${ph}" aria-label="心願"><button data-act="af_eat">加入</button></div><div class="urlrow" style="margin-left:0"><input id="u_eat" placeholder="網址（可留空）" aria-label="網址"><input id="h_eat" placeholder="營業時間（可留空，例如 10:00–18:00，週一公休）" aria-label="營業時間" style="margin-top:6px"></div></div><div class="mut sm" style="margin-top:8px">誰想吃（可不選）</div><div class="chips" style="margin:4px 0 0">${D.people.length?byT(D.people).map(p=>`<button class="pc ${wishSel.includes(p.id)?'on':''}" data-act="wn" data-p="${p.id}">${esc(p.name)}</button>`).join(''):'<span class="mut sm">先在上方「參加人員」加入</span>'}</div>`;
+  const mg='';
   return `<div class="tabs" style="margin-top:0">${T.map(x=>`<button class="${x[0]===k?'on':''}" data-act="ft" data-k="${x[0]}">${x[1]}</button>`).join('')}</div><section class="card"><h3>${title}　${n}/${l.length}</h3>${body}${add}${mg}</section>`;
 }
 function expV(){
@@ -433,10 +434,10 @@ function buildText(){
   L.push('■ 共同裝備');
   byT(D.gear).forEach(x=>{const ow=(Array.isArray(x.ppl)?x.ppl:[]).filter(okid).map(nr);L.push(`${x.done?'☑':'☐'} ${x.text}${x.qty?' ×'+x.qty:''}${ow.length?`（負責：${ow.join('、')}）`:''}`)});
   L.push('','■ 心願清單');
-  byO(D.food.filter(x=>x.kind==='eat')).forEach(x=>{const ow=(Array.isArray(x.ppl)?x.ppl:[]).filter(okid).map(nr);L.push(`${x.done?'☑':'☐'} ${x.text}${ow.length?`（誰想吃：${ow.join('、')}）`:''}`)});
+  byO(D.food.filter(x=>x.kind==='eat')).forEach(x=>{const ow=(Array.isArray(x.ppl)?x.ppl:[]).filter(okid).map(nr);L.push(`${x.done?'☑':'☐'} ${x.text}${x.url?' '+x.url:''}${x.hours?'（營業 '+x.hours+'）':''}${ow.length?`（誰想吃：${ow.join('、')}）`:''}`)});
   L.push('','■ 食材採買');
   const buys=byO(D.food.filter(x=>x.kind==='buy'));
-  CT().forEach(c=>{const g=buys.filter(x=>catOf(x)===c);if(g.length){L.push(`【${c}】`);g.forEach(x=>L.push(`${x.done?'☑':'☐'} ${x.text}${x.qty?' ×'+x.qty:''}`))}});
+  [['','未分配'],...P.map(p=>[p.id,p.name])].forEach(([id,nv])=>{const g=buys.filter(x=>ownOf(x)===id);if(g.length){L.push(`【${nv}】`);g.forEach(x=>L.push(`${x.done?'☑':'☐'} ${x.text}${x.qty?' ×'+x.qty:''}`))}});
   if(D.memo.length){L.push('','■ 備忘錄');byT(D.memo).forEach(x=>L.push('・'+x.text))}
   if(D.exp.length){
     L.push('','■ 費用明細');
@@ -573,7 +574,7 @@ document.addEventListener('click',e=>{
   else if(a==='wn'){wishSel=wishSel.includes(d.p)?wishSel.filter(i=>i!==d.p):[...wishSel,d.p];b.classList.toggle('on')}
   else if(a==='we'){editWish=d.i;render()}
   else if(a==='wc'){editWish='';render()}
-  else if(a==='ws'){const t=v('wq_t');if(!t)return;upd('food',d.i,{text:t});editWish='';render()}
+  else if(a==='ws'){const t=v('wq_t');if(!t)return;upd('food',d.i,{text:t,url:normUrl(v('wq_u')),hours:v('wq_h')});editWish='';render()}
   else if(a==='wp'){wishOpen=wishOpen===d.i?'':d.i;render()}
   else if(a==='wt'){const x=D.food.find(f=>f.id===d.i);if(!x)return;const cur=Array.isArray(x.ppl)?x.ppl:[];upd('food',x.id,{ppl:cur.includes(d.p)?cur.filter(i=>i!==d.p):[...cur,d.p]})}
   else if(a==='mm'){const c=d.c,m=d.m;if(dayEdit&&dayDraft)dayDraft['m_'+c+'_mode']=m;else saveNote({['m_'+c+'_mode']:m});b.closest('.fw').querySelectorAll('.mt .pc').forEach(x=>x.classList.toggle('on',x.dataset.m===m));$('#u_'+c).hidden=m!=='out';$('#g_'+c).hidden=m!=='cook'}
@@ -602,7 +603,7 @@ document.addEventListener('click',e=>{
   else if(a==='dc'){saveMeta({cats:CT().filter(x=>x!==d.k)})}
   else if(a==='ai'){const x=v('x_'+d.d);if(x)put('items',uid(),{date:d.d,time:$('#t_'+d.d).value,text:x,url:normUrl(v('w_'+d.d)),hours:v('h_'+d.d),t:Date.now()})}
   else if(a==='ag'){const x=v('gt');if(x)put('gear',uid(),{text:x,qty:v('gq'),done:false,t:Date.now()})}
-  else if(a==='af_eat'||a==='af_buy'){const k=a.slice(3),x=v('f_'+k);if(x)put('food',uid(),{kind:k,text:x,qty:v('q_'+k),cat:v('c_'+k),ppl:k==='eat'?wishSel.filter(id=>D.people.some(p=>p.id===id)):[],done:false,t:Date.now()});if(x&&k==='eat')wishSel=[]}
+  else if(a==='af_eat'||a==='af_buy'){const k=a.slice(3),x=v('f_'+k);if(x)put('food',uid(),{kind:k,text:x,qty:v('q_'+k),own:v('c_'+k),url:normUrl(v('u_'+k)),hours:v('h_'+k),ppl:k==='eat'?wishSel.filter(id=>D.people.some(p=>p.id===id)):[],done:false,t:Date.now()});if(x&&k==='eat')wishSel=[]}
   else if(a==='am'){const x=v('mt');if(x)put('memo',uid(),{text:x,t:Date.now()})}
   else if(a==='tg'){upd(d.n,d.i,{done:b.checked})}
   else if(a==='dl'){
@@ -662,7 +663,7 @@ document.addEventListener('change',e=>{
   if(e.target.classList.contains('wi')&&db){const w1=parseFloat(e.target.value);if(w1>=0)upd('people',e.target.dataset.i,{w:w1})}
   if(e.target.id==='c_buy')buyCat=e.target.value;
   if(e.target.classList.contains('px')&&db)saveMeta({proxy:{...(M.proxy||{}),[e.target.dataset.i]:e.target.value}});
-  if(e.target.classList.contains('ci')&&db)upd('food',e.target.dataset.i,{cat:e.target.value});
+  if(e.target.classList.contains('ci')&&db)upd('food',e.target.dataset.i,{own:e.target.value});
   if(e.target.classList.contains('qi')&&db)upd(e.target.dataset.n||'food',e.target.dataset.i,e.target.dataset.n==='gear'?{qty:e.target.value.trim()}:{qty:e.target.value.trim(),qm:true});});
 $('#cv').onclick=()=>$('#cf').click();
 $('#cx').onclick=()=>saveMeta({cover:''});
