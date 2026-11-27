@@ -150,7 +150,7 @@ button,input,select,textarea{touch-action:manipulation}
 /* ===== 在這裡貼上你的 Firebase 設定 ===== */
 const CFG={apiKey:"AIzaSyDyUk-VMrg0YbBEgc_cueQSku8R1vZ5o_c",authDomain:"trip-plan-9cbe5.firebaseapp.com",projectId:"trip-plan-9cbe5",storageBucket:"trip-plan-9cbe5.firebasestorage.app",messagingSenderId:"42515293827",appId:"1:42515293827:web:a7f6fafa908f7c13081db6"};
 /* ======================================= */
-const VERSION='v1.41 · 2026-11-20';
+const VERSION='v1.42 · 2026-11-20';
 
 const $=s=>document.querySelector(s);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -279,7 +279,7 @@ function syncIng(notes){
   buys.forEach(x=>{if(x.auto&&!x.qm&&!x.done&&cnt[key(x)]===undefined)del('food',x.id)});
 }
 const saveNote=p=>{putm('notes',selDay,p);const has=D.notes.some(n=>n.id===selDay);const nn=has?D.notes.map(n=>n.id===selDay?{...n,...p}:n):[...D.notes,{id:selDay,...p}];syncIng(nn);syncMealExp(nn)};
-const itemEdit=t=>`<div class="it" style="flex-direction:column;align-items:stretch;gap:6px"><div class="add" style="margin:0"><input type="time" id="ei_t" value="${esc(t.time||'')}" aria-label="時間"><input id="ei_x" value="${esc(t.text)}" aria-label="行程內容"></div><input id="ei_u" value="${esc(t.url||'')}" placeholder="網址（可留空）" aria-label="網址"><div class="add" style="margin:0"><button data-act="is" data-i="${t.id}">儲存</button><button class="x" data-act="ic" style="border:1.5px solid var(--ln)">取消</button></div></div>`;
+const itemEdit=t=>`<div class="it" style="flex-direction:column;align-items:stretch;gap:6px"><div class="add" style="margin:0"><input type="time" id="ei_t" value="${esc(t.time||'')}" aria-label="時間"><input id="ei_x" value="${esc(t.text)}" aria-label="行程內容"></div><input id="ei_u" value="${esc(t.url||'')}" placeholder="網址（可留空）" aria-label="網址"><input id="ei_h" value="${esc(t.hours||'')}" placeholder="營業時間（可留空，例如 10:00–18:00，週一公休）" aria-label="營業時間"><div class="add" style="margin:0"><button data-act="is" data-i="${t.id}">儲存</button><button class="x" data-act="ic" style="border:1.5px solid var(--ln)">取消</button></div></div>`;
 const viewInfo=nd=>{
   const row=(l,h)=>`<div class="vi"><span>${l}</span><div>${h}</div></div>`,L=[],ML=[];
   if(nd.text)L.push(`<div class="hl">${esc(nd.text)}</div>`);
@@ -323,8 +323,8 @@ function tripV(){
     const mode=nd['m_'+c+'_mode']==='cook'?'cook':'out',ing=String(nd['m_'+c+'_ing']||'');
     return `<div class="fw"><label><span>${l}</span><input class="dayf" id="m_${c}" value="${esc(nd['m_'+c]||'')}" placeholder="吃什麼、哪裡吃" aria-label="${l}" style="flex:1">${lkb(mode==='cook'?'':nd['m_'+c+'_url'])}<button class="owb ${ow.length?'has':''}" data-act="ow" data-c="${c}" aria-label="${l}負責人">${ow.length?ow.map(id=>nm(id)).join('、'):'＋負責人'}</button></label>${mode==='cook'&&ing.trim()?`<div class="ingl mut sm" style="margin:0 0 4px 42px">🍳 ${esc(ing)}</div>`:''}${mealSum('m_'+c,nd)}<div class="urlrow"><div class="mt chips" style="margin:0 0 4px"><button class="pc ${mode==='out'?'on':''}" data-act="mm" data-c="${c}" data-m="out">外食</button><button class="pc ${mode==='cook'?'on':''}" data-act="mm" data-c="${c}" data-m="cook">自煮</button></div><input class="dayf" id="u_${c}" value="${esc(nd['m_'+c+'_url']||'')}" placeholder="網址（可留空）" aria-label="${l}網址" ${mode==='out'?'':'hidden'}><input class="dayf" id="g_${c}" value="${esc(ing)}" placeholder="食材，用逗號隔開，例如：雞腿肉, 洋蔥" aria-label="${l}食材" ${mode==='cook'?'':'hidden'}>${moneyPanel('m_'+c,nd)}</div>${chips}</div>`}).join('')}</div>
   <div class="mut sm">住宿</div>${staysOf(nd).map((k,i,arr)=>{const rooms=roomsOf(nd,k);return `<div style="border:1.5px solid color-mix(in srgb,var(--pu) 35%,var(--ln));border-radius:8px;padding:8px 10px;margin:4px 0 10px"><div class="fw"><div style="display:flex;gap:6px;align-items:center"><input class="dayf" id="${k}" value="${esc(nd[k]||'')}" placeholder="${arr.length>1?'第 '+(i+1)+' 間：':''}民宿或旅館名稱、地址" aria-label="住宿地點" style="flex:1;margin:0">${lkb(nd[k+'_url'])}${arr.length>1?`<button class="x" data-act="sr" data-k="${k}" aria-label="移除這間住宿">✕</button>`:''}</div><div class="urlrow" style="margin-left:0"><input class="dayf" id="u_${k}" value="${esc(nd[k+'_url']||'')}" placeholder="網址（可留空）" aria-label="住宿網址"></div></div>${rooms.map(mk=>`<div class="fw" style="margin:6px 0 2px 6px"><div style="display:flex;gap:6px;align-items:center"><span class="mut sm" style="flex:0 0 auto">🛏</span><input class="dayf" id="lb_${mk}" value="${esc(nd[rlk(mk)]||'')}" placeholder="房型（例如：2人房，可留空）" aria-label="房型" style="flex:1;margin:0">${rooms.length>1?`<button class="x" data-act="rr" data-k="${k}" data-m="${mk}" aria-label="移除這個房型">✕</button>`:''}</div>${mealSum(mk,nd,6)}<div class="urlrow" style="margin-left:0">${moneyPanel(mk,nd)}</div></div>`).join('')}<button class="x" data-act="rad" data-k="${k}" style="padding:2px 0 0 6px;font-size:13px;color:var(--ac)">＋ 新增房型</button></div>`}).join('')}<button class="x" data-act="sad" style="padding:2px 0;font-size:13px;color:var(--ac)">＋ 再加一間住宿</button>`:viewInfo(nd)}`+
-  (it.length?it.map(t=>t.id===editItem?itemEdit(t):`<div class="it"><b>${esc(t.time||'—')}</b><span>${lk(t.text)}</span>${lkb(t.url)}<button class="x" data-act="ie" data-i="${t.id}" aria-label="編輯">✎</button><button class="x" data-act="dl" data-n="items" data-i="${t.id}" aria-label="刪除">✕</button></div>`).join(''):'<div class="mut">還沒有安排</div>')+
-  `<div class="fw" style="margin-top:10px"><div class="add" style="margin-top:0"><input type="time" id="t_${k}" aria-label="時間"><input id="x_${k}" placeholder="去哪裡、做什麼" aria-label="行程內容"><button data-act="ai" data-d="${k}">加入</button></div><div class="urlrow" style="margin-left:0"><input id="w_${k}" placeholder="網址（可留空）" aria-label="網址"></div></div></section>`;
+  (it.length?it.map(t=>t.id===editItem?itemEdit(t):`<div class="it" style="flex-wrap:wrap"><b>${esc(t.time||'—')}</b><span>${lk(t.text)}</span>${lkb(t.url)}<button class="x" data-act="ie" data-i="${t.id}" aria-label="編輯">✎</button><button class="x" data-act="dl" data-n="items" data-i="${t.id}" aria-label="刪除">✕</button>${t.hours?`<div class="mut sm" style="flex:0 0 100%;padding-left:62px;margin-top:-4px">🕒 ${esc(t.hours)}</div>`:''}</div>`).join(''):'<div class="mut">還沒有安排</div>')+
+  `<div class="fw" style="margin-top:10px"><div class="add" style="margin-top:0"><input type="time" id="t_${k}" aria-label="時間"><input id="x_${k}" placeholder="去哪裡、做什麼" aria-label="行程內容"><button data-act="ai" data-d="${k}">加入</button></div><div class="urlrow" style="margin-left:0"><input id="w_${k}" placeholder="網址（可留空）" aria-label="網址"><input id="h_${k}" placeholder="營業時間（可留空，例如 10:00–18:00，週一公休）" aria-label="營業時間" style="margin-top:6px"></div></div></section>`;
 }
 const pdone=x=>!!(x.done&&typeof x.done==='object'&&x.done[me]);
 const prow=x=>`<div class="it"><input type="checkbox" data-act="tp" data-i="${x.id}" ${pdone(x)?'checked':''} aria-label="完成"><span class="${pdone(x)?'done':''}">${esc(x.text)}</span><button class="x" data-act="dl" data-n="pitem" data-i="${x.id}" aria-label="刪除">✕</button></div>`;
@@ -416,7 +416,7 @@ function buildText(){
     const nd=D.notes.find(n=>n.id===k)||{};
     if(nd.weather)L.push('  天氣：'+nd.weather);
     if(nd.text)L.push('  重點：'+nd.text);
-    D.items.filter(x=>x.date===k).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')).forEach(t=>L.push(`  ${t.time||'--:--'} ${t.text}${t.url?' '+t.url:''}`));
+    D.items.filter(x=>x.date===k).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')).forEach(t=>L.push(`  ${t.time||'--:--'} ${t.text}${t.url?' '+t.url:''}${t.hours?'（營業 '+t.hours+'）':''}`));
     ['b','l','s','d','n'].forEach(c=>{
       const nmx=nd['m_'+c],cook=nd['m_'+c+'_mode']==='cook',ing=nd['m_'+c+'_ing'],url=nd['m_'+c+'_url'],amt=parseFloat(nd['m_'+c+'_amt']);
       const ow=(Array.isArray(nd['o_'+c])?nd['o_'+c]:[]).filter(okid).map(nr);
@@ -579,7 +579,7 @@ document.addEventListener('click',e=>{
   else if(a==='mm'){const c=d.c,m=d.m;if(dayEdit&&dayDraft)dayDraft['m_'+c+'_mode']=m;else saveNote({['m_'+c+'_mode']:m});b.closest('.fw').querySelectorAll('.mt .pc').forEach(x=>x.classList.toggle('on',x.dataset.m===m));$('#u_'+c).hidden=m!=='out';$('#g_'+c).hidden=m!=='cook'}
   else if(a==='ie'){editItem=d.i;render()}
   else if(a==='ic'){editItem='';render()}
-  else if(a==='is'){const x=v('ei_x');if(!x)return;putm('items',d.i,{time:$('#ei_t').value,text:x,url:normUrl(v('ei_u'))});editItem='';render()}
+  else if(a==='is'){const x=v('ei_x');if(!x)return;putm('items',d.i,{time:$('#ei_t').value,text:x,url:normUrl(v('ei_u')),hours:v('ei_h')});editItem='';render()}
   else if(a==='st'){const id=d.f+'_'+d.t,sd=D.settled.find(x=>x.id===id);if(sd&&String(sd.v)===d.v)del('settled',id);else put('settled',id,{v:Number(d.v)})}
   else if(a==='es'){expTab=d.k;render()}
   else if(a==='ee'){expTab='add';editExp=d.i;splitMode=(D.exp.find(x=>x.id===d.i)||{}).mode||'eq';render();const f=$('#et');if(f)f.scrollIntoView({block:'center'})}
@@ -600,7 +600,7 @@ document.addEventListener('click',e=>{
   else if(a==='ce'){catEdit=!catEdit;render()}
   else if(a==='ac'){const n=v('cn');if(!n||CT().includes(n))return;saveMeta({cats:[...CT().filter(x=>x!=='其他'),n,'其他']})}
   else if(a==='dc'){saveMeta({cats:CT().filter(x=>x!==d.k)})}
-  else if(a==='ai'){const x=v('x_'+d.d);if(x)put('items',uid(),{date:d.d,time:$('#t_'+d.d).value,text:x,url:normUrl(v('w_'+d.d)),t:Date.now()})}
+  else if(a==='ai'){const x=v('x_'+d.d);if(x)put('items',uid(),{date:d.d,time:$('#t_'+d.d).value,text:x,url:normUrl(v('w_'+d.d)),hours:v('h_'+d.d),t:Date.now()})}
   else if(a==='ag'){const x=v('gt');if(x)put('gear',uid(),{text:x,qty:v('gq'),done:false,t:Date.now()})}
   else if(a==='af_eat'||a==='af_buy'){const k=a.slice(3),x=v('f_'+k);if(x)put('food',uid(),{kind:k,text:x,qty:v('q_'+k),cat:v('c_'+k),ppl:k==='eat'?wishSel.filter(id=>D.people.some(p=>p.id===id)):[],done:false,t:Date.now()});if(x&&k==='eat')wishSel=[]}
   else if(a==='am'){const x=v('mt');if(x)put('memo',uid(),{text:x,t:Date.now()})}
